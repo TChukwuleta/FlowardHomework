@@ -37,7 +37,7 @@ namespace Floward.Broker
                 body: body);
         }
 
-        public void SendMessage<T>(List<T> messages, ProductType productType)
+        /*public void SendMessage<T>(List<T> messages, ProductType productType)
         {
             if (!messages.Any()) return;
             var rabbitConfig = _rabbitMQConfiguration.GetRabbitMQConfigData();
@@ -62,7 +62,7 @@ namespace Floward.Broker
             Dictionary<string, object> dict = new Dictionary<string, object>();
             _brokerProvider.RabbitMQChannel.BasicConsume(rabbitConfig.Queue, false, message, false, false, dict, consumer);
             return JsonConvert.DeserializeObject<T>(message);
-        }
+        }*/
 
         public void Received()
         {
@@ -80,10 +80,10 @@ namespace Floward.Broker
                 var type = ea.RoutingKey;
                 if(type == "user.create")
                 {
-                    
+                    // Add and save to DB   
                 }
             };
-            channel.BasicConsume(queue: "user",
+            channel.BasicConsume(queue: "user.orderservice",
                 autoAck: true,
                 consumer: consumer);
         }
