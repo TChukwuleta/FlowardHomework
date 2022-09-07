@@ -1,8 +1,11 @@
-﻿using Floward.Domain.Entities;
+﻿using Floward.Broker.Config;
+using Floward.Domain.Entities;
 using Floward.Domain.Enums;
 using Floward.Domain.Interfaces.IRepositories;
+using Floward.Domain.Interfaces.MessageBroker;
 using Floward.Domain.Model;
 using MediatR;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,9 +23,11 @@ namespace Floward.Application.Commands.UserCommands
     public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Result>
     {
         private readonly IUserRepository _userRepository;
-        public CreateUserCommandHandler(IUserRepository userRepository)
+        private readonly IBrokerService _brokerService;
+        public CreateUserCommandHandler(IUserRepository userRepository, IBrokerService brokerService)
         {
             _userRepository = userRepository;
+            _brokerService = brokerService;
         }
 
         public async Task<Result> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -43,6 +48,12 @@ namespace Floward.Application.Commands.UserCommands
                     UserId = new Guid().ToString()
                 };
                 var result = await _userRepository.AddAsync(newUser);
+                var integrationEventData = JsonConvert.SerializeObject(new
+                {
+                    Id = result.UserId,
+                    name = result.UserName
+                });
+                //_brokerService.PublishToMessageQueue("user.create", integrationEventData);
                 return Result.Success("User creation was successful", result);
             }
             catch (Exception ex)

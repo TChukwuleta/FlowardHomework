@@ -18,6 +18,7 @@ namespace Floward.Application.Commands.ProductCommands
         public string Name { get; set; }
         public string ProductImage { get; set; }
         public decimal Price { get; set; }
+        public ProductType ProductType { get; set; }
     }
     public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, Result>
     {
@@ -44,7 +45,8 @@ namespace Floward.Application.Commands.ProductCommands
                     StatusDesc = Status.Active.ToString(),
                     Price = request.Price,
                     CreatedDate = DateTime.Now,
-                    ProductImage = request.ProductImage
+                    ProductImage = request.ProductImage,
+                    ProductType = request.ProductType
                 };
                 var result = await _productRepository.AddAsync(newProduct);
                 return Result.Success("Product creation was successful", result);

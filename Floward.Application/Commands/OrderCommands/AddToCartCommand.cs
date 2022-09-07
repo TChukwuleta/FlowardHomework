@@ -1,10 +1,12 @@
 ﻿using Floward.Domain.Entities;
 using Floward.Domain.Enums;
 using Floward.Domain.Interfaces.IRepositories;
+using Floward.Domain.Interfaces.MessageBroker;
 using Floward.Domain.Model;
 using Floward.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,9 +27,11 @@ namespace Floward.Application.Commands.OrderCommands
         private readonly IOrderRepository _orderRepository;
         private readonly IUserRepository _userRepository;
         private readonly ApplicationDbContext _context;
-        public AddToCartCommandHandler(IOrderRepository orderRepository, ApplicationDbContext context, IUserRepository userRepository)
+        private readonly IBrokerService _brokerService;
+        public AddToCartCommandHandler(IOrderRepository orderRepository, ApplicationDbContext context, IUserRepository userRepository, IBrokerService brokerService)
         {
             _orderRepository = orderRepository;
+            _brokerService = brokerService;
             _context = context;
             _userRepository = userRepository;
         }
@@ -67,7 +71,13 @@ namespace Floward.Application.Commands.OrderCommands
                 List<Product> products = new List<Product>();
                 products.Add(existingProduct);
                 newOrder.Products = products;
-                await _orderRepository.AddAsync(newOrder);
+                var result = await _orderRepository.AddAsync(newOrder);
+                var integrationEventData = JsonConvert.SerializeObject(new
+                {
+                    Id = result.Id,
+                    name = result.Quantity
+                });
+                _brokerService.PublishToMessageQueue("user.orderservice", integrationEventData);
                 return Result.Success("Order was successfully added to Cart");
             }
             catch (Exception ex)
