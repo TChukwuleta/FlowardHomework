@@ -30,13 +30,6 @@ namespace Floward.Application.Commands.OrderCommands
         {
             try
             {
-                /*var existingOrder = await _context.Orders
-                    .FirstOrDefaultAsync(c => c.UserId == request.UserId && c.Id == request.OrderId);
-                if (existingOrder == null)
-                {
-                    return Result.Failure("Order does not exist");
-                }*/
-
                 var existingOrder = await _orderRepository.GetByIdAsync(request.OrderId);
                 await _orderRepository.DeleteAsync(existingOrder);
                 return Result.Success("Order was successfully removed from Cart");

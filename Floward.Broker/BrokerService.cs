@@ -15,13 +15,9 @@ namespace Floward.Broker
 {
     public class BrokerService : IBrokerService
     {
-        private readonly IRabbitMQConfiguration _rabbitMQConfiguration;
         private readonly IConfiguration _config;
-        private readonly IBrokerProvider _brokerProvider;
-        public BrokerService(IBrokerProvider brokerProvider, IRabbitMQConfiguration rabbitMQConfiguration, IConfiguration config)
+        public BrokerService(IConfiguration config)
         {
-            _brokerProvider = brokerProvider;
-            _rabbitMQConfiguration = rabbitMQConfiguration;
             _config = config;
         }
 
@@ -37,32 +33,6 @@ namespace Floward.Broker
                 body: body);
         }
 
-        /*public void SendMessage<T>(List<T> messages, ProductType productType)
-        {
-            if (!messages.Any()) return;
-            var rabbitConfig = _rabbitMQConfiguration.GetRabbitMQConfigData();
-            var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messages));
-            _brokerProvider.RabbitMQChannel.BasicPublish(rabbitConfig.Exchange, $"{productType}", true, null, body);
-        }
-
-        public T ReceiveMessage<T>()
-        {
-            var message = "";
-            var rabbitConfig = _rabbitMQConfiguration.GetRabbitMQConfigData();
-            var consumer = new EventingBasicConsumer(_brokerProvider.RabbitMQChannel);
-            consumer.Received += (model, ea) =>
-            {
-                var body = ea.Body.ToArray();
-                message = Encoding.UTF8.GetString(body);
-                if (string.IsNullOrEmpty(message))
-                {
-                    _brokerProvider.RabbitMQChannel.BasicAck(ea.DeliveryTag, false);
-                }
-            };
-            Dictionary<string, object> dict = new Dictionary<string, object>();
-            _brokerProvider.RabbitMQChannel.BasicConsume(rabbitConfig.Queue, false, message, false, false, dict, consumer);
-            return JsonConvert.DeserializeObject<T>(message);
-        }*/
 
         public void Received()
         {
